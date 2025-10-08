@@ -12,7 +12,7 @@ provider "aws" {
 }
 
 resource "aws_iam_user" "jenkins_user" {
-  name = "yaw-user"
+  name = "yaww-user"
 }
 
 resource "aws_s3_bucket" "jenkins_bucket" {
