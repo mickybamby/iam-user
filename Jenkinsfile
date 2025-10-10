@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     stages {
         stage('Checkout') {
             steps {
@@ -8,39 +9,56 @@ pipeline {
             }
         }
 
-        stage('Terraform Init') {
+        stage('Terraform Operations') {
             steps {
-                echo 'Initializing Terraform working directory...'
-                // Crucial for downloading providers and setting up the backend (e.g., S3 for state locking)
-                sh 'terraform init'
-            }
-        }
-
-        stage('Terraform Validate') {
-            steps {
-                echo 'Validating Terraform configuration...'
-                sh 'terraform validate'
-            }
-        }
-
-        stage('Terraform Plan & Apply') {
-            steps {
-                // Use the AWS plugin to inject credentials securely
+                // Use AWS Credentials Plugin to inject credentials for all Terraform steps
                 withAWS(credentials: 'aws-jenkins', region: 'eu-west-1') {
-                    echo 'Creating Terraform plan...'
-                    sh 'terraform plan -out=tfplan'
-
-                    echo 'Applying Terraform plan...'
-                    sh 'terraform apply -auto-approve tfplan'
+                    stage('Terraform Init') {
+                        steps {
+                            echo 'Initializing Terraform working directory...'
+                            sh 'terraform init'
+                        }
+                    }
+                    stage('Terraform Validate') {
+                        steps {
+                            echo 'Validating Terraform configuration...'
+                            sh 'terraform validate'
+                        }
+                    }
+                    stage('Terraform Plan') {
+                        steps {
+                            echo 'Creating Terraform execution plan...'
+                            sh 'terraform plan -out=tfplan'
+                        }
+                    }
+                    stage('Terraform Apply') {
+                        steps {
+                            echo 'Applying Terraform configuration to AWS...'
+                            sh 'terraform apply -auto-approve tfplan'
+                        }
+                    }
                 }
             }
         }
-        
+
         stage('Cleanup') {
             steps {
-        sh 'rm -f tfplan'
-        sh 'rm -rf .terraform .terraform.lock.hcl'
+                echo 'Cleaning up temporary files...'
+                sh 'rm -f tfplan'
+                sh 'rm -rf .terraform .terraform.lock.hcl'
+            }
+        }
     }
-}
+
+    post {
+        always {
+            echo 'Pipeline completed.'
+        }
+        failure {
+            echo 'Pipeline failed! Check Terraform or AWS credentials.'
+        }
+        success {
+            echo 'Pipeline succeeded! Resources created.'
+        }
     }
 }
