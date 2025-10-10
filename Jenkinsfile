@@ -44,6 +44,13 @@ pipeline {
             }
         }
 
+        stage('Terraforom Destroy') {
+            steps {
+                echo 'Destroying configuration from AWS...'
+                sh 'terraform destroy -auto-approve'
+            }
+        }
+
         stage('Cleanup') {
             steps {
                 echo 'Cleaning up temporary files...'
