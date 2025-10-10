@@ -9,34 +9,38 @@ pipeline {
             }
         }
 
-        stage('Terraform Operations') {
+        stage('Terraform Init') {
             steps {
-                // Use AWS Credentials Plugin to inject credentials for all Terraform steps
                 withAWS(credentials: 'aws-jenkins', region: 'eu-west-1') {
-                    stage('Terraform Init') {
-                        steps {
-                            echo 'Initializing Terraform working directory...'
-                            sh 'terraform init'
-                        }
-                    }
-                    stage('Terraform Validate') {
-                        steps {
-                            echo 'Validating Terraform configuration...'
-                            sh 'terraform validate'
-                        }
-                    }
-                    stage('Terraform Plan') {
-                        steps {
-                            echo 'Creating Terraform execution plan...'
-                            sh 'terraform plan -out=tfplan'
-                        }
-                    }
-                    stage('Terraform Apply') {
-                        steps {
-                            echo 'Applying Terraform configuration to AWS...'
-                            sh 'terraform apply -auto-approve tfplan'
-                        }
-                    }
+                    echo 'Initializing Terraform working directory...'
+                    sh 'terraform init'
+                }
+            }
+        }
+
+        stage('Terraform Validate') {
+            steps {
+                withAWS(credentials: 'aws-jenkins', region: 'eu-west-1') {
+                    echo 'Validating Terraform configuration...'
+                    sh 'terraform validate'
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                withAWS(credentials: 'aws-jenkins', region: 'eu-west-1') {
+                    echo 'Creating Terraform execution plan...'
+                    sh 'terraform plan -out=tfplan'
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                withAWS(credentials: 'aws-jenkins', region: 'eu-west-1') {
+                    echo 'Applying Terraform configuration to AWS...'
+                    sh 'terraform apply -auto-approve tfplan'
                 }
             }
         }
