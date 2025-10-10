@@ -38,5 +38,12 @@ pipeline {
                 sh 'terraform apply -auto-approve tfplan'
             }
         }
+        
+        stage('Cleanup') {
+            steps {
+        sh 'rm -f tfplan'
+        sh 'rm -rf .terraform .terraform.lock.hcl'
+    }
+}
     }
 }
