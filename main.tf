@@ -27,6 +27,6 @@ resource "aws_s3_bucket" "jenkins_bucket" {
   bucket = "jenkins-bucket-unique-name-12345"
   tags = {
     Name        = "JenkinsBucket"
-    Environment = "Dev"
+    Environment = "test"
   }
 }

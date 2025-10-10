@@ -23,19 +23,16 @@ pipeline {
             }
         }
 
-        stage('Terraform Plan') {
+        stage('Terraform Plan & Apply') {
             steps {
-                echo 'Creating Terraform execution plan...'
-                // Saves the plan to a file to ensure consistency between plan and apply
-                sh 'terraform plan -out=tfplan'
-            }
-        }
+                // Use the AWS plugin to inject credentials securely
+                withAWS(credentials: 'aws-jenkins', region: 'eu-west-1') {
+                    echo 'Creating Terraform plan...'
+                    sh 'terraform plan -out=tfplan'
 
-        stage('Terraform Apply') {
-            steps {
-                echo 'Applying Terraform configuration to AWS...'
-                // Applies the saved plan file
-                sh 'terraform apply -auto-approve tfplan'
+                    echo 'Applying Terraform plan...'
+                    sh 'terraform apply -auto-approve tfplan'
+                }
             }
         }
         
