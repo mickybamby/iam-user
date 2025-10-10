@@ -19,7 +19,7 @@ provider "aws" {
 
 # Existing IAM user
 resource "aws_iam_user" "jenkins_user" {
-  name = "nana2"
+  name = "nana3"
 }
 
 # Existing S3 bucket for Jenkins

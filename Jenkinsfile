@@ -1,6 +1,13 @@
 pipeline {
     agent any
 
+    environment {
+        // Inject AWS credentials as environment variables
+        AWS_ACCESS_KEY_ID = credentials('aws-jenkins')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-jenkinss')
+        AWS_DEFAULT_REGION = 'eu-west-1'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -11,37 +18,29 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                withAWS(credentials: 'aws-jenkins', region: 'eu-west-1') {
-                    echo 'Initializing Terraform working directory...'
-                    sh 'terraform init'
-                }
+                echo 'Initializing Terraform working directory...'
+                sh 'terraform init'
             }
         }
 
         stage('Terraform Validate') {
             steps {
-                withAWS(credentials: 'aws-jenkins', region: 'eu-west-1') {
-                    echo 'Validating Terraform configuration...'
-                    sh 'terraform validate'
-                }
+                echo 'Validating Terraform configuration...'
+                sh 'terraform validate'
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                withAWS(credentials: 'aws-jenkins', region: 'eu-west-1') {
-                    echo 'Creating Terraform execution plan...'
-                    sh 'terraform plan -out=tfplan'
-                }
+                echo 'Creating Terraform execution plan...'
+                sh 'terraform plan -out=tfplan'
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                withAWS(credentials: 'aws-jenkins', region: 'eu-west-1') {
-                    echo 'Applying Terraform configuration to AWS...'
-                    sh 'terraform apply -auto-approve tfplan'
-                }
+                echo 'Applying Terraform configuration to AWS...'
+                sh 'terraform apply -auto-approve tfplan'
             }
         }
 
