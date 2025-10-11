@@ -1,0 +1,51 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read  # Sufficient for checking out code and running Terraform
+
+env:
+  AWS_REGION: us-east-1  # Set your AWS region here
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.9.8  # Specify desired Terraform version
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Validate
+      run: terraform validate
+
+    - name: Generate Terraform Plan
+      run: terraform plan -out=tfplan
+
+    - name: Upload Terraform Plan
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-plan
+        path: tfplan
+
+    - name: Apply Terraform Configuration
+      run: terraform apply -auto-approve tfplan
