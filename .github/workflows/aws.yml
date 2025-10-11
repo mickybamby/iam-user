@@ -49,3 +49,6 @@ jobs:
 
     - name: Apply Terraform Configuration
       run: terraform apply -auto-approve tfplan
+    
+    - name: Destroy Terraform Configuration
+      run: terraform destroy -auto-approve || true
