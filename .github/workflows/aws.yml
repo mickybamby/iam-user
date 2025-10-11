@@ -8,7 +8,7 @@ permissions:
   contents: read  # Sufficient for checking out code and running Terraform
 
 env:
-  AWS_REGION: us-east-1  # Set your AWS region here
+  AWS_REGION: eu-west-1  # Set your AWS region here
 
 jobs:
   deploy:
