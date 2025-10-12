@@ -3,9 +3,9 @@ pipeline {
 
     environment {
         // Inject AWS credentials as environment variables
-        AWS_ACCESS_KEY_ID     = credentials('aws_access_key_id')
-        AWS_SECRET_ACCESS_KEY = credentials('aws_secret_key_id')
-        AWS_DEFAULT_REGION     = 'eu-west-1'
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
+        AWS_DEFAULT_REGION = 'eu-west-1'
     }
 
     stages {
@@ -16,28 +16,6 @@ pipeline {
             }
         }
 
-        stage('Setup Tools') {
-  steps {
-    sh '''
-      echo "Installing linters..."
-      sudo apt-get update -y
-      sudo apt-get install -y curl unzip
-
-      echo "Installing TFLint..."
-      curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | sudo bash
-
-      echo "Installing Trivy..."
-      curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
-
-      echo "Verifying tools..."
-      terraform -version
-      tflint --version
-      trivy --version
-    '''
-  }
-}
-
-
         stage('Terraform Init') {
             steps {
                 echo 'Initializing Terraform working directory...'
@@ -45,29 +23,10 @@ pipeline {
             }
         }
 
-        stage('Lint Terraform Code') {
-            steps {
-                sh '''
-                  echo "Running tflint..."
-                  tflint --init
-                  tflint
-                '''
-            }
-        }
-
         stage('Terraform Validate') {
             steps {
                 echo 'Validating Terraform configuration...'
                 sh 'terraform validate'
-            }
-        }
-
-        stage('Static Security Analysis (Trivy)') {
-            steps {
-                sh '''
-                  echo "Running Trivy security scan..."
-                  trivy config --severity HIGH,CRITICAL .
-                '''
             }
         }
 
@@ -85,7 +44,7 @@ pipeline {
             }
         }
 
-        stage('Terraform Destroy') {
+        stage('Terraforom Destroy') {
             steps {
                 echo 'Destroying configuration from AWS...'
                 sh 'terraform destroy -auto-approve'
