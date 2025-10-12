@@ -8,6 +8,10 @@ pipeline {
         AWS_DEFAULT_REGION     = 'eu-west-1'
     }
 
+    parameters {
+    booleanParam(name: 'APPLY_CHANGES', defaultValue: false, description: 'Apply Terraform changes') 
+  }
+
     stages {
         stage('Checkout') {
             steps {
@@ -85,11 +89,15 @@ pipeline {
         }
 
         stage('Terraform Destroy') {
+            when {
+                expression { return params.APPLY_CHANGES }
+    }
             steps {
-                echo 'Destroying configuration from AWS...'
+                input message: 'Destroy Terraform resources?', ok: 'Destroy'
                 sh 'terraform destroy -auto-approve'
-            }
-        }
+    }
+}
+
 
         stage('Cleanup') {
             steps {
