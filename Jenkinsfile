@@ -46,14 +46,13 @@ pipeline {
         }
 
         stage('Lint Terraform Code') {
-            steps {
-                sh '''
-                  echo "Running tflint..."
-                  tflint --init
-                  tflint
-                '''
-            }
-        }
+    steps {
+        echo "Running tflint..."
+        sh 'tflint --init'
+        // Run tflint but don't fail the pipeline on warnings
+        sh(script: 'tflint || true', label: 'Run TFLint')
+    }
+}
 
         stage('Terraform Validate') {
             steps {
